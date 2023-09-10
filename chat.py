@@ -13,12 +13,16 @@ import os
 import time
 
 
-def get_vectorstore():
-    client = qdrant_client.QdrantClient(
+def get_qdrant_client():
+    return qdrant_client.QdrantClient(
         url=os.getenv("QDRANT_HOST"),
         port=os.getenv("QDRANT_PORT"),
         api_key=os.getenv("QDRANT_API_KEY"),
         https=True)
+
+
+def get_vector_store():
+    client = get_qdrant_client()
 
     embeddings = OpenAIEmbeddings()
 
@@ -36,7 +40,7 @@ def get_conversation_chain():
         memory_key='chat_history', return_messages=True)
     conversation_chain = ConversationalRetrievalChain.from_llm(
         llm=llm,
-        retriever=get_vectorstore().as_retriever(),
+        retriever=get_vector_store().as_retriever(),
         memory=memory
     )
     return conversation_chain
