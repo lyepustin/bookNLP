@@ -11,6 +11,7 @@ import ebooklib
 import logging
 import os
 import sys
+import time
 
 from langchain.chat_models import ChatOpenAI
 from langchain.memory import ConversationBufferMemory
@@ -20,24 +21,6 @@ from sentence_transformers import SentenceTransformer
 from qdrant_client.http.models import Distance, VectorParams
 
 from chat import get_qdrant_client, get_vector_store
-# def get_qdrant_client():
-#     return qdrant_client.QdrantClient(
-#         url=os.getenv("QDRANT_HOST"),
-#         port=os.getenv("QDRANT_PORT"),
-#         api_key=os.getenv("QDRANT_API_KEY"),
-#         https=True)
-
-
-# def get_vector_store():
-#     client = get_qdrant_client()
-
-#     embeddings = OpenAIEmbeddings()
-
-#     return Qdrant(
-#         client=client, 
-#         collection_name=os.getenv("QDRANT_COLLECTION_NAME"), 
-#         embeddings=embeddings,
-#     )
 
 
 def recreate_qdrant_collection(collection_name, size):
@@ -51,6 +34,20 @@ def recreate_qdrant_collection(collection_name, size):
         logging.info(f"'{collection_name}' collection re-created.")
     except Exception as e:
         logging.error(f"on create collection '{collection_name}'. " + str(e).replace('\n',' '))
+
+
+def split_list_by_length(input_list, max_length):
+    sublists, current_sublist, current_length = [], [], 0
+
+    for item in input_list:
+        if current_length + len(item) <= max_length:
+            current_sublist.append(item)
+            current_length += len(item)
+        else:
+            sublists.append(current_sublist)
+            current_sublist, current_length = [item], len(item)
+
+    return sublists + [current_sublist] if current_sublist else []
 
 
 def get_text_chunks(text):
@@ -79,6 +76,44 @@ def add_some_text():
             f"to the '{os.getenv('VECTOR_DATABASE')}' vector database.")
 
 
+def get_ebook_chunks(ebook_path):
+    raw_text_list = []
+    for i, item in enumerate(epub.read_epub(ebook_path).get_items()):
+        if item.get_type() == ebooklib.ITEM_DOCUMENT:
+            raw_content = item.get_body_content().decode('utf-8')
+            soup = BeautifulSoup(raw_content, "html.parser")
+            paragraphs = soup.find_all("p")
+            for paragraph in paragraphs:
+                raw_text_list.append(paragraph.get_text())
+
+    return get_text_chunks(" ".join(raw_text_list))
+
+
+def add_full_book():
+    recreate_qdrant_collection(
+        os.getenv("QDRANT_COLLECTION_NAME"), os.getenv("QDRANT_COLLECTION_SIZE"))
+    
+    # text = os.getenv("TEXT_SAMPLE")
+    max_length = 250000
+
+    text_chunks = get_ebook_chunks("docs/sherlock-holmes.epub")
+    splited_text_chunks = split_list_by_length(text_chunks, max_length)
+    vector_store = get_vector_store()
+
+    for text_chunks in splited_text_chunks:
+        logging.info(
+            f"adding content to the vector database of size: '{sum(len(text) for text in text_chunks)}'.")
+        ids = vector_store.add_texts(text_chunks)
+        if len(ids) > 1:
+            logging.info(
+                f"partial content of book '{os.getenv('BOOK_NAME')}' successfully added " +
+                f"to the '{os.getenv('VECTOR_DATABASE')}' vector database.")
+        
+        sleep_time = 60
+        logging.warning(
+            f"sleeping for: '{sleep_time}' secs.")
+        time.sleep(sleep_time)
+
 def main():
     load_dotenv()
     logging.basicConfig(
@@ -86,7 +121,7 @@ def main():
         format='%(asctime)s - %(levelname)s - %(message)s')
     
     options = {
-        # '--full': add_book,
+        '--full': add_full_book,
         '--some': add_some_text,
         # "--test": test_llm
     }
