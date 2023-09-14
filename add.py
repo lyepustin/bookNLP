@@ -89,27 +89,42 @@ def get_ebook_chunks(ebook_path):
     return get_text_chunks(" ".join(raw_text_list))
 
 
-def add_full_book():
-    recreate_qdrant_collection(
-        os.getenv("QDRANT_COLLECTION_NAME"), os.getenv("QDRANT_COLLECTION_SIZE"))
-    
-    # text = os.getenv("TEXT_SAMPLE")
-    max_length = 250000
+def recurrent_qdrant_add_texts(text_chunks, max_attempts=5):
+    attempt = 1
+    while attempt <= max_attempts:
+        try:
+            vector_store = get_vector_store()
+            ids = vector_store.add_texts(text_chunks)
+            return ids
+        except qdrant_client.http.exceptions.ResponseHandlingException as e:
+            logging.warning(f"[Qdrant Client] Attempt {attempt} to add_texts: Operation timed out, retrying...")
+            attempt += 1
+            time.sleep(1)  
+        except Exception as e:
+            logging.error(f"[Qdrant Client] Attempt {attempt} to add_texts: Encountered an unexpected error: {e}")
+            sys.exit()
+    if attempt > max_attempts:
+        logging.error(f"[Qdrant Client] Operation add_texts failed after {max_attempts} attempts.")
+        sys.exit()
 
-    text_chunks = get_ebook_chunks("docs/sherlock-holmes.epub")
-    splited_text_chunks = split_list_by_length(text_chunks, max_length)
-    vector_store = get_vector_store()
+
+def add_full_book():
+    # recreate_qdrant_collection(
+    #     os.getenv("QDRANT_COLLECTION_NAME"), os.getenv("QDRANT_COLLECTION_SIZE"))
+
+    text_chunks = get_ebook_chunks("docs/moby-dick.epub")
+    splited_text_chunks = split_list_by_length(text_chunks, os.getenv("OPENAI_EMBEDDINGS_LIMIT_BYTES"))
 
     for text_chunks in splited_text_chunks:
         logging.info(
             f"adding content to the vector database of size: '{sum(len(text) for text in text_chunks)}'.")
-        ids = vector_store.add_texts(text_chunks)
+        ids = recurrent_qdrant_add_texts(text_chunks)
         if len(ids) > 1:
             logging.info(
                 f"partial content of book '{os.getenv('BOOK_NAME')}' successfully added " +
                 f"to the '{os.getenv('VECTOR_DATABASE')}' vector database.")
         
-        sleep_time = 60
+        sleep_time = os.getenv("OPENAI_EMBEDDINGS_LIMIT_SECONDS")
         logging.warning(
             f"sleeping for: '{sleep_time}' secs.")
         time.sleep(sleep_time)
