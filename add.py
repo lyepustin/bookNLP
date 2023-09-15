@@ -108,12 +108,19 @@ def recurrent_qdrant_add_texts(text_chunks, max_attempts=5):
         sys.exit()
 
 
+def get_ebook_title(ebook_path):
+    ebook = epub.read_epub(ebook_path)
+    return ebook.get_metadata('DC', 'title')[0][0]
+
+
 def add_full_book():
     # recreate_qdrant_collection(
     #     os.getenv("QDRANT_COLLECTION_NAME"), os.getenv("QDRANT_COLLECTION_SIZE"))
 
-    text_chunks = get_ebook_chunks("docs/moby-dick.epub")
-    splited_text_chunks = split_list_by_length(text_chunks, os.getenv("OPENAI_EMBEDDINGS_LIMIT_BYTES"))
+    path = "docs/sherlock-holmes.epub"
+    ebook_name = get_ebook_title(path)
+    text_chunks = get_ebook_chunks(path)
+    splited_text_chunks = split_list_by_length(text_chunks, int(os.getenv("OPENAI_EMBEDDINGS_LIMIT_BYTES")))
 
     for text_chunks in splited_text_chunks:
         logging.info(
@@ -121,10 +128,10 @@ def add_full_book():
         ids = recurrent_qdrant_add_texts(text_chunks)
         if len(ids) > 1:
             logging.info(
-                f"partial content of book '{os.getenv('BOOK_NAME')}' successfully added " +
+                f"partial content of book '{ebook_name}' successfully added " +
                 f"to the '{os.getenv('VECTOR_DATABASE')}' vector database.")
         
-        sleep_time = os.getenv("OPENAI_EMBEDDINGS_LIMIT_SECONDS")
+        sleep_time = int(os.getenv("OPENAI_EMBEDDINGS_LIMIT_SECONDS"))
         logging.warning(
             f"sleeping for: '{sleep_time}' secs.")
         time.sleep(sleep_time)
