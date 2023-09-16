@@ -6,6 +6,7 @@ from langchain.memory import ConversationBufferMemory
 from langchain.chains import ConversationalRetrievalChain
 from langchain.vectorstores import Qdrant
 from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain.embeddings import HuggingFaceInstructEmbeddings
 
 from dotenv import load_dotenv
 import qdrant_client
@@ -24,7 +25,8 @@ def get_qdrant_client():
 def get_vector_store():
     client = get_qdrant_client()
 
-    embeddings = OpenAIEmbeddings()
+    # embeddings = OpenAIEmbeddings()
+    embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl")
 
     return Qdrant(
         client=client, 
