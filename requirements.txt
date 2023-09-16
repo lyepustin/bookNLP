@@ -5,6 +5,7 @@ streamlit_extras
 openai
 qdrant-client
 tiktoken
+ebooklib
 
 
 # uncomment to use huggingface llms
