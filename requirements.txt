@@ -6,6 +6,8 @@ openai
 qdrant-client
 tiktoken
 ebooklib
+pytesseract
+Pillow
 
 
 # uncomment to use huggingface llms
