@@ -25,12 +25,12 @@ def get_qdrant_client():
 def get_vector_store():
     client = get_qdrant_client()
 
-    # embeddings = OpenAIEmbeddings()
-    embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl")
+    embeddings = OpenAIEmbeddings()
+    # embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl")
 
     return Qdrant(
-        client=client, 
-        collection_name=os.getenv("QDRANT_COLLECTION_NAME"), 
+        client=client,
+        collection_name=os.getenv("QDRANT_COLLECTION_NAME"),
         embeddings=embeddings,
     )
 
@@ -54,7 +54,7 @@ def main():
         page_title="Chat with multiple Book's",
         page_icon=":books:",
         layout="centered",
-    )   
+    )
     st.header("Ask your remote database 💬")
 
     if "conversation" not in st.session_state:
@@ -64,6 +64,7 @@ def main():
         if prompt := st.chat_input():
             add_message("user", prompt, avatar="🧑‍💻")
             response = st.session_state.conversation({'question': prompt})
+
             def stream_echo():
                 for word in response['answer'].split():
                     yield word + " "
