@@ -6,6 +6,8 @@ openai
 qdrant-client
 tiktoken
 ebooklib
+google-api-python-client
+wikipedia
 pytesseract
 Pillow
 
