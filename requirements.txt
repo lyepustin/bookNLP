@@ -8,6 +8,8 @@ tiktoken
 ebooklib
 google-api-python-client
 wikipedia
+pytesseract
+Pillow
 
 
 # uncomment to use huggingface llms
