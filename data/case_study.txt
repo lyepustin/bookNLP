@@ -17,3 +17,49 @@ Resume:
     BookMyEvent Inc is seeking a data platform solution to enhance their analytics capabilities. The solution should be implemented on a cloud platform and enable reporting, A/B testing, ad-hoc research, and potentially machine learning models. It should also be efficient and scalable to handle large data sources. Consistency of data used for reporting is important, and the solution should provide historical changes for non-append tables. 
     The deliverables include a 30-minute presentation explaining the solution architecture, design choices, and how the soft requirements were addressed. 
     Assumptions should be documented, an architecture diagram using official cloud icons is recommended.
+
+Quest & Answers:
+1. Which cloud platform would you prefer to use for implementing the data platform solution? (e.g., AWS, Google Cloud, Azure)
+    The choice of cloud platform for implementing the data platform solution would depend on various factors such as budget, existing infrastructure, and specific requirements. Some popular options include AWS, Google Cloud, and Azure. 
+    Do you have any preferences or constraints in this regard?
+
+2. Are there any specific cloud-native services or technologies that you would like to leverage for scalability and efficiency?
+    To ensure scalability and efficiency, 
+    we can leverage cloud-native services and technologies such as serverless computing (AWS Lambda, Google Cloud Functions), 
+    managed data processing services (AWS Glue, Google Cloud Dataflow), 
+    and distributed storage systems (AWS S3, Google Cloud Storage). 
+    Amazon S3 for storage, Amazon Redshift for data warehousing, and Amazon EMR for big data processing.
+    Additionally, technologies like Apache Spark and Apache Kafka can be used for data processing and streaming. 
+    These services can handle large data volumes and provide automatic scaling based on demand.
+
+
+3. Can you provide more details about the data sources and volumes that need to be handled by the data platform solution?
+    To better understand the data sources and volumes, it would be helpful to know the types of data being collected from the microservices and external marketing sources. Additionally, information about the expected data volumes, such as the number of events per day or the size of the inventory database, would be useful.
+
+4. How frequently do you expect data updates or changes to occur in the system?
+    The frequency of data updates or changes in the system would depend on the specific microservices and data sources. It would be helpful to know if there are any real-time data requirements or if the updates occur on a scheduled basis.
+
+5. Are there any specific reporting or analytics tools that you would like to integrate with the data platform solution?
+    extracting insights from the data platform solution. 
+    Integration with reporting and analytics tools can be achieved through services like Amazon QuickSight, Tableau, or Power BI. It would be beneficial to know if there are any specific tools that you prefer to integrate with the data platform solution.
+
+6. Can you provide more information about the desired A/B testing capabilities? What kind of experiments do you plan to run?
+    evaluate the impact of changes on user behavior or business metrics. 
+    A/B testing capabilities can be implemented using tools like Apache Airflow or custom experimentation frameworks. It would be helpful to understand the types of experiments you plan to run and the metrics you would like to track.
+
+7. Are there any specific machine learning models that you would like to incorporate into the data platform solution?
+    allow advanced analytics and predictive capabilities. 
+    Incorporating machine learning models into the data platform solution can be done using services like Amazon SageMaker or Google Cloud ML Engine. 
+    It would be beneficial to know if there are any specific machine learning models you have in mind or if you have any requirements regarding model training and deployment.
+    Examples include recommendation systems, fraud detection models, or customer segmentation models.
+
+8. Can you provide more details about the desired ad-hoc research capabilities? What kind of research queries or analysis do you expect to perform?
+    Ad-hoc research capabilities can be provided through tools like Apache Drill or Presto for interactive querying. It would be helpful to understand the types of research queries or analysis you expect to perform in order to design the appropriate capabilities.
+
+9. Are there any specific security or compliance requirements that need to be considered in the design of the data platform solution?
+    critical considerations in the design of the data platform solution. 
+    Security and compliance requirements should be considered in the design of the data platform solution. This may include encryption of data at rest and in transit, access control mechanisms, and compliance with regulations such as GDPR. It would be helpful to know if there are any specific security or compliance requirements that need to be addressed.
+
+10. Do you have any preferences or constraints regarding the programming languages or frameworks to be used in the implementation of the data platform solution?
+    I prefer to work with python and native library of spark
+    However, it would be beneficial to know if there are any existing technologies or languages that the company is already using or if there are any preferences in terms of language or framework.
