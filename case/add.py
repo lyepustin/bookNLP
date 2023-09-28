@@ -110,17 +110,62 @@ def test_chat_messages():
     print(f"test_chat_messages Output: {str(result.content)}")
 
 
-def test_chat_messages_v2():
+def test_chat_messages_interview():
     import langchain
     langchain.debug = True
     from langchain.chat_models import ChatOpenAI
     from langchain.schema import HumanMessage, SystemMessage, AIMessage
     result = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=.0, openai_api_key=os.getenv("OPENAI_API_KEY"))(
         [
-            SystemMessage(content="You are a helpful AI assistant specialising in data engineering, providing concise advice to users"),
-            HumanMessage(content="I'm planning my wedding. Any suggestions for beach-themed decorations"),
-            AIMessage(content="For a beach-themed wedding, consider seashell centerpieces and aqua-blue accents"),
-            HumanMessage(content="What other ideas do you have for a beach wedding?")
+            SystemMessage(content="""
+            You are a helpful AI assistant specialising in data engineering, fulfilling the role of a job interviewer. Your duty is to ask questions to the user based on the following use case:
+            BookMyEvent Inc is an online event planning and management company that wants to improve its analytics capabilities. 
+            BookMyEvent Inc currently utilizes multiple microservices written in Python and Golang. These microservices, such as the UserManagement service, are packaged as Docker containers and run on a Kubernetes cluster. The backend services are served via an API Gateway, and the UserManagement microservice handles user lifecycle and authentication using Python. The Inventory microservice, written in Go, manages the purchasing process, and the Inventory DB stores both product information and purchase history. The company also collects clickstream events from the frontend using Snowplow in Kafka. In terms of external marketing sources, BookMyEvent utilizes Google, Facebook, Tiktok, and Twitter Ads.
+            BookMyEvent Inc is seeking a data platform solution to enhance their analytics capabilities. The solution should be implemented on a cloud platform and enable reporting, A/B testing, ad-hoc research, and potentially machine learning models. It should also be efficient and scalable to handle large data sources. Consistency of data used for reporting is important, and the solution should provide historical changes for non-append tables. 
+            The deliverables include a 30-minute presentation explaining the solution architecture, design choices, and how the soft requirements were addressed. 
+            Assumptions should be documented, an architecture diagram using official cloud icons is recommended.
+            """),
+            HumanMessage(content="""
+            Efficiency and Scalability: Cloud-native services are inherently scalable, allowing BookMyEvent to handle large data volumes efficiently. Autoscaling and serverless options can be utilized.
+            Data Consistency: Separating raw data storage from structured data warehousing and using version-controlled tables ensures data consistency.
+            Historical Changes: By maintaining historical versions of tables, analysts can access historical data changes.
+            """),
+            # AIMessage(content="For a beach-themed wedding, consider seashell centerpieces and aqua-blue accents"),
+            # HumanMessage(content="What other ideas do you have for a beach wedding?")
+        ]
+    )
+    print("-----------")
+    print(f"test_chat_messages Output: {str(result.content)}")
+
+
+def test_chat_messages_interview_answer():
+    import langchain
+    langchain.debug = True
+    from langchain.chat_models import ChatOpenAI
+    from langchain.schema import HumanMessage, SystemMessage, AIMessage
+    result = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=.0, openai_api_key=os.getenv("OPENAI_API_KEY"))(
+        [
+            SystemMessage(content="""
+            You are a helpful AI assistant specialised in data engineering, who fulfils the role of doing a job interview. Your duty is to answer the user's questions avoiding use questions as answers based on the following use case::
+            BookMyEvent Inc is an online event planning and management company that wants to improve its analytics capabilities. 
+            BookMyEvent Inc currently utilizes multiple microservices written in Python and Golang. These microservices, such as the UserManagement service, are packaged as Docker containers and run on a Kubernetes cluster. The backend services are served via an API Gateway, and the UserManagement microservice handles user lifecycle and authentication using Python. The Inventory microservice, written in Go, manages the purchasing process, and the Inventory DB stores both product information and purchase history. The company also collects clickstream events from the frontend using Snowplow in Kafka. In terms of external marketing sources, BookMyEvent utilizes Google, Facebook, Tiktok, and Twitter Ads.
+            BookMyEvent Inc is seeking a data platform solution to enhance their analytics capabilities. The solution should be implemented on a cloud platform and enable reporting, A/B testing, ad-hoc research, and potentially machine learning models. It should also be efficient and scalable to handle large data sources. Consistency of data used for reporting is important, and the solution should provide historical changes for non-append tables. 
+            The deliverables include a 30-minute presentation explaining the solution architecture, design choices, and how the soft requirements were addressed. 
+            Assumptions should be documented, an architecture diagram using official cloud icons is recommended.
+            """),
+            HumanMessage(content="""
+            2. Are there any specific cloud-native services or technologies that you would like to leverage for scalability and efficiency?
+            3. Can you provide more details about the data sources and volumes that need to be handled by the data platform solution?
+            4. How frequently do you expect data updates or changes to occur in the system?
+            5. Are there any specific reporting or analytics tools that you would like to integrate with the data platform solution?
+            6. Can you provide more information about the desired A/B testing capabilities? What kind of experiments do you plan to run?
+            7. Are there any specific machine learning models that you would like to incorporate into the data platform solution?
+            8. Can you provide more details about the desired ad-hoc research capabilities? What kind of research queries or analysis do you expect to perform?
+            9. Are there any specific security or compliance requirements that need to be considered in the design of the data platform solution?
+            10. Do you have any preferences or constraints regarding the programming languages or frameworks to be used in the implementation of the data platform solution?
+            """),
+            # AIMessage(content="For a beach-themed wedding, consider seashell centerpieces and aqua-blue accents"),
+            # HumanMessage(content="What other ideas do you have for a beach wedding?")
         ]
     )
     print("-----------")
@@ -141,7 +186,8 @@ def main():
         format='%(asctime)s - %(levelname)s - %(message)s')
 
     # test_prompt_template()
-    test_chat_messages()
+    # test_chat_messages()
+    test_chat_messages_interview_answer()
 
 if __name__ == '__main__':
     main()
