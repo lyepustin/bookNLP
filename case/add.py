@@ -147,27 +147,28 @@ def test_chat_messages_interview_answer():
     from langchain.schema import HumanMessage, SystemMessage, AIMessage
     result = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=.0, openai_api_key=os.getenv("OPENAI_API_KEY"))(
         [
-            SystemMessage(content="""
-            You are a helpful AI assistant specialised in data engineering, who fulfils the role of doing a job interview. Your duty is to answer the user's questions avoiding use questions as answers based on the following use case::
-            BookMyEvent Inc is an online event planning and management company that wants to improve its analytics capabilities. 
-            BookMyEvent Inc currently utilizes multiple microservices written in Python and Golang. These microservices, such as the UserManagement service, are packaged as Docker containers and run on a Kubernetes cluster. The backend services are served via an API Gateway, and the UserManagement microservice handles user lifecycle and authentication using Python. The Inventory microservice, written in Go, manages the purchasing process, and the Inventory DB stores both product information and purchase history. The company also collects clickstream events from the frontend using Snowplow in Kafka. In terms of external marketing sources, BookMyEvent utilizes Google, Facebook, Tiktok, and Twitter Ads.
-            BookMyEvent Inc is seeking a data platform solution to enhance their analytics capabilities. The solution should be implemented on a cloud platform and enable reporting, A/B testing, ad-hoc research, and potentially machine learning models. It should also be efficient and scalable to handle large data sources. Consistency of data used for reporting is important, and the solution should provide historical changes for non-append tables. 
-            The deliverables include a 30-minute presentation explaining the solution architecture, design choices, and how the soft requirements were addressed. 
-            Assumptions should be documented, an architecture diagram using official cloud icons is recommended.
-            """),
-            HumanMessage(content="""
-            2. Are there any specific cloud-native services or technologies that you would like to leverage for scalability and efficiency?
-            3. Can you provide more details about the data sources and volumes that need to be handled by the data platform solution?
-            4. How frequently do you expect data updates or changes to occur in the system?
-            5. Are there any specific reporting or analytics tools that you would like to integrate with the data platform solution?
-            6. Can you provide more information about the desired A/B testing capabilities? What kind of experiments do you plan to run?
-            7. Are there any specific machine learning models that you would like to incorporate into the data platform solution?
-            8. Can you provide more details about the desired ad-hoc research capabilities? What kind of research queries or analysis do you expect to perform?
-            9. Are there any specific security or compliance requirements that need to be considered in the design of the data platform solution?
-            10. Do you have any preferences or constraints regarding the programming languages or frameworks to be used in the implementation of the data platform solution?
-            """),
-            # AIMessage(content="For a beach-themed wedding, consider seashell centerpieces and aqua-blue accents"),
-            # HumanMessage(content="What other ideas do you have for a beach wedding?")
+            SystemMessage(
+                content="""
+You are a helpful AI assistant specialised in data engineering, who fulfils the role of doing a job interview. Your duty is to answer the user's questions avoiding use questions as answers based on the following use case:
+Their systems run on a generic cloud. Uses microservices written in Python and Golang packaged as Docker containers running on a Kubernetes cluster. Updates to the microservices are managed using a GitOps approach. Cross-platform website (frontend). Backend services are served via an API Gateway. Two databases for customer data and product/purchase history. Clickstream events from the frontend are tracked using Snowplow in Kafka. External marketing sources: Google, Facebook, Tiktok and Twitter Ads."""),
+            HumanMessage(
+                content="They would like to have an analytical tool that would allow them to  have a reporting system, A/B testing, ad-hoc research and possibly ML models."),
+            # HumanMessage(
+            #     content="Are there any specific cloud-managed services that you would like to leverage?"),
+            # HumanMessage(
+            #     content="How much data do you expect to process on a daily basis?"),
+            # HumanMessage(
+            #     content="What are the key metrics and dimensions that you would like to track for reporting and A/B testing?"),
+            # HumanMessage(
+            #     content="Are there any specific machine learning models that you would like to incorporate into the solution?"),
+            # HumanMessage(
+            #     content="How do you currently handle data governance and data lineage?"),
+            # HumanMessage(
+            #     content="Are there any specific security or compliance requirements that need to be considered?"),
+            # HumanMessage(
+            #     content="Do you have any preferences for the programming languages or frameworks to be used in the solution?"),
+            # HumanMessage(
+            #     content="Are there any existing systems or databases that need to be integrated with the solution?"),
         ]
     )
     print("-----------")
@@ -189,7 +190,7 @@ def main():
 
     # test_prompt_template()
     # test_chat_messages()
-    test_chat_messages_interview()
+    test_chat_messages_interview_answer()
 
 if __name__ == '__main__':
     main()
