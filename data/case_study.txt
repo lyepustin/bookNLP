@@ -63,3 +63,21 @@ Quest & Answers:
 10. Do you have any preferences or constraints regarding the programming languages or frameworks to be used in the implementation of the data platform solution?
     I prefer to work with python and native library of spark
     However, it would be beneficial to know if there are any existing technologies or languages that the company is already using or if there are any preferences in terms of language or framework.
+
+
+To bring all the data into an Azure or AWS cloud-based solution for further analysis, I would recommend using the following tools:
+    1. AWS Glue or Azure Data Factory: These tools can be used for data ingestion, transformation, and orchestration. They provide a managed service for moving and preparing data from various sources into your cloud environment.
+
+    2. Apache Kafka: Kafka can be used as a distributed streaming platform to collect and process clickstream events from the frontend. It can act as a buffer between the frontend and the cloud-based solution, ensuring reliable and scalable data ingestion.
+
+    3. Snowplow Analytics: Snowplow can be used to track clickstream events from the frontend and send them to Kafka. It provides a flexible and customizable event tracking solution that can capture user interactions and behavior on the website.
+
+    4. AWS Kinesis or Azure Event Hubs: These services can be used to ingest and process streaming data from various sources, including Snowplow and other marketing sources like Google, Facebook, Tiktok, and Twitter Ads. They provide scalable and real-time data streaming capabilities.
+
+    5. AWS S3 or Azure Blob Storage: These object storage services can be used to store the raw and processed data. They provide scalable and durable storage options for both structured and unstructured data.
+
+    6. AWS Glue Data Catalog or Azure Data Catalog: These services can be used to create a centralized metadata repository for all the data sources. They provide a unified view of the data and enable easy discovery and exploration.
+
+    7. AWS Redshift or Azure Synapse Analytics: These data warehousing services can be used for further analysis and reporting. They provide scalable and performant options for running complex queries on large datasets.
+
+    8. AWS Athena or Azure Data Lake Analytics: These serverless query services can be used for ad-hoc analysis and exploration of the data. They allow you to run SQL queries directly on the data stored in S3 or Azure Data Lake Storage.

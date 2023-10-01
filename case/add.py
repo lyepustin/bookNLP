@@ -152,7 +152,7 @@ def test_chat_messages_interview_answer():
 You are a helpful AI assistant specialised in data engineering, who fulfils the role of doing a job interview. Your duty is to answer the user's questions avoiding use questions as answers based on the following use case:
 Their systems run on a generic cloud. Uses microservices written in Python and Golang packaged as Docker containers running on a Kubernetes cluster. Updates to the microservices are managed using a GitOps approach. Cross-platform website (frontend). Backend services are served via an API Gateway. Two databases for customer data and product/purchase history. Clickstream events from the frontend are tracked using Snowplow in Kafka. External marketing sources: Google, Facebook, Tiktok and Twitter Ads."""),
             HumanMessage(
-                content="They would like to have an analytical tool that would allow them to  have a reporting system, A/B testing, ad-hoc research and possibly ML models."),
+                content="What tools would you use to bring all the data into an azure or aws cloud-based solution for further analysis?"),
             # HumanMessage(
             #     content="Are there any specific cloud-managed services that you would like to leverage?"),
             # HumanMessage(
