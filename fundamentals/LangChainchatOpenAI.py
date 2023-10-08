@@ -1,3 +1,14 @@
+# File: LangChainchatOpenAI.py
+# Author: Denys L
+# Date: October 8, 2023
+# Description: 
+#   This snippet demonstrates how to use the LangChain library to create a chat 
+#   interaction with an OpenAI language model. The script sets up a conversation 
+#   with a system message, human input, AI-generated response, and additional 
+#   human input, showcasing the interaction flow with the language model.
+
+
+
 from langchain.chat_models import ChatOpenAI
 from langchain.schema import HumanMessage, SystemMessage, AIMessage
 from dotenv import load_dotenv

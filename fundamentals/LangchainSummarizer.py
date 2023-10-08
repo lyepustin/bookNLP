@@ -1,19 +1,26 @@
+# File: LangchainSummarizer.py
+# Author: Denys L
+# Date: October 8, 2023
+# Description: 
+#   Demonstrates a simple text summarization process using 
+#   LangChain and OpenAI, specifically employing a map-reduce approach to 
+#   summarize a portion of the text from the file "quijote.txt."
+
+
 from langchain.chains.summarize import load_summarize_chain
 from langchain import OpenAI, PromptTemplate, LLMChain
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.chains.mapreduce import MapReduceChain
 from langchain.prompts import PromptTemplate
-
 from langchain.chains.summarize import load_summarize_chain
 from langchain.document_loaders import TextLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-
 
 from dotenv import load_dotenv
 load_dotenv()
 import os
 import pathlib
-import textwrap
+
 
    
 def summarization_map_reduce(data_path):
@@ -38,8 +45,3 @@ if __name__ == '__main__':
     path_parent = pathlib.Path(__file__).parent.parent.resolve()
     data_path = f"{path_parent}/data/quijote.txt"
     summarization_map_reduce(data_path)
-
-
-# import os
-
-# separator = os.path.sep
