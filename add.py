@@ -1,3 +1,8 @@
+# File: LangChainchatOpenAI.py
+# Author: Denys L
+# Date: October 8, 2023
+# Description: 
+
 from langchain.llms import OpenAI
 from langchain.vectorstores import Qdrant
 from langchain.embeddings.openai import OpenAIEmbeddings
