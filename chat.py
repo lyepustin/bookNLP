@@ -1,3 +1,8 @@
+# File: LangChainchatOpenAI.py
+# Author: Denys L
+# Date: October 8, 2023
+# Description: 
+
 import streamlit as st
 from streamlit_extras.stateful_chat import chat, add_message
 
