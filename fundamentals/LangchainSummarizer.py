@@ -27,26 +27,25 @@ import os
 import pathlib
 
 
-   
-def summarization_map_reduce_v0(data_path):
-    llm = OpenAI(temperature=0, openai_api_key=os.getenv("OPENAI_API_KEY"))
+def summarization_refine(data_path):
+    # Define LLM chain
+    llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo-16k", openai_api_key=os.getenv("OPENAI_API_KEY"))
 
     loader = TextLoader(data_path, encoding="utf-8")
     documents = loader.load()
 
     # Get your splitter ready
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=50)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=16000, chunk_overlap=50)
 
     # Split your docs into texts
     texts = text_splitter.split_documents(documents)
 
     # There is a lot of complexity hidden in this one line. I encourage you to check out the video above for more detail
-    chain = load_summarize_chain(llm, chain_type="map_reduce", verbose=True)
-    chain.run(texts[:4])
+    chain = load_summarize_chain(llm, chain_type="refine", verbose=True)
+    print(chain.run(texts[:3]))
 
 
 def summarization_stuff(data_path):
-    llm = OpenAI(temperature=0, openai_api_key=os.getenv("OPENAI_API_KEY"))
 
     loader = TextLoader(data_path, encoding="utf-8")
     documents = loader.load()
@@ -142,6 +141,7 @@ def summarization_map_reduce(data_path):
 if __name__ == '__main__':
     path_parent = pathlib.Path(__file__).parent.parent.resolve()
     data_path = f"{path_parent}/data/quijote.txt"
-    summarization_map_reduce(data_path)
+    # summarization_map_reduce(data_path)
+    summarization_refine(data_path)
     # summarization_stuff(data_path)
     # tutorial: https://python.langchain.com/docs/use_cases/summarization
