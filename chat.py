@@ -30,8 +30,8 @@ def get_qdrant_client():
 def get_vector_store():
     client = get_qdrant_client()
 
-    # embeddings = OpenAIEmbeddings()
-    embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl")
+    embeddings = OpenAIEmbeddings()
+    # embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl")
 
     return Qdrant(
         client=client, 
