@@ -2,6 +2,7 @@ langchain
 python-dotenv
 streamlit
 streamlit_extras
+streamlit_chat
 openai
 qdrant-client
 tiktoken

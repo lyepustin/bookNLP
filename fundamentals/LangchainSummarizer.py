@@ -10,7 +10,9 @@ import pathlib
 import ebooklib
 from ebooklib import epub
 from bs4 import BeautifulSoup
+import time
 
+from langchain.schema import Document
 from langchain.chat_models import ChatOpenAI
 from langchain import OpenAI, LLMChain, PromptTemplate
 from langchain.chains.combine_documents.stuff import StuffDocumentsChain
@@ -24,28 +26,66 @@ load_dotenv()
 
 class TextProcessor:
     def __init__(self):
-        self.splited_docs = None
+        self.split_docs = None
+        self.raw_documents = {}
+        self.documents = []
         self.chunk_size = int(os.getenv("TEXT_SPLITTER_CHUNK_SIZE"))
         self.chunk_overlap = int(os.getenv("TEXT_SPLITTER_CHUNK_OVERLAP"))
+        self.min_content = int(os.getenv("BOOK_MIN_CONTENT_PER_CHAPTER"))
         self.text_splitter = RecursiveCharacterTextSplitter(chunk_size=self.chunk_size, chunk_overlap=self.chunk_overlap)
 
     def process_text(self):
         loader = TextLoader(self.data_path, encoding="utf-8")
         self.split_docs = self.text_splitter.split_documents(loader.load())
 
+    def process_raw_docs(self):
+        for chapter, texts_list in self.raw_documents.items():
+            texts = " ".join(texts_list)
+            if len(texts) > self.min_content:
+                self.documents.append(
+                    Document(
+                        page_content=texts,
+                        metadata={
+                            'source': self.data_path,
+                            'chapter' : chapter,
+                            'document_create_time' : time.time()
+                        }))
+
     def process_book(self):
-        raw_text_list = []
-        for item in epub.read_epub(data_path).get_items():
+        chapter = "Cover"
+        for item in epub.read_epub(self.data_path).get_items():
             if item.get_type() == ebooklib.ITEM_DOCUMENT:
-                raw_content = item.get_body_content().decode('utf-8')
-                soup = BeautifulSoup(raw_content, "html.parser")
-                chapter = soup.find("h2")
-                if chapter:
-                    raw_text_list.append(chapter.get_text())
+                soup = BeautifulSoup(item.get_body_content().decode('utf-8'), "html.parser")
+                if soup.find("h2"):
+                    chapter = soup.find("h2").get_text()
                 paragraphs = soup.find_all("p")
                 for paragraph in paragraphs:
-                    raw_text_list.append(paragraph.get_text())
-        self.split_docs = self.text_splitter.create_documents([" ".join(raw_text_list)])
+                    if self.raw_documents.get(chapter):
+                        texts = self.raw_documents.get(chapter)
+                        texts.append(paragraph.get_text())
+                        self.raw_documents.update({
+                            chapter: texts
+                        })
+                    else:
+                        self.raw_documents.update({
+                            chapter: [paragraph.get_text()]
+                        })
+
+        self.process_raw_docs()
+        self.split_docs = self.text_splitter.split_documents(self.documents)
+        self.grouped_docs = {}
+        for doc in self.split_docs:
+            grouped_doc = self.grouped_docs.get(doc.metadata.get('chapter'))
+            if grouped_doc:
+                grouped_doc.append(doc)
+                self.grouped_docs.update({
+                    doc.metadata.get('chapter'): grouped_doc
+                })
+            else:
+                self.grouped_docs.update({
+                    doc.metadata.get('chapter'): [doc]
+                })
+
 
     def process_file(self, data_path):
         self.data_path = data_path
@@ -99,17 +139,32 @@ class MapReduceSummarizer:
         reduce_documents_chain = ReduceDocumentsChain(combine_documents_chain=combine_documents_chain,
                                                       collapse_documents_chain=combine_documents_chain,
                                                       token_max=self.text_processor.chunk_size, verbose=True)
-        map_reduce_chain = MapReduceDocumentsChain(llm_chain=map_chain, reduce_documents_chain=reduce_documents_chain,
-                                                   document_variable_name="docs", return_intermediate_steps=False, verbose=True)
-        print(map_reduce_chain.run(self.text_processor.split_docs[:3]))
+        # map_reduce_chain = MapReduceDocumentsChain(llm_chain=map_chain, reduce_documents_chain=reduce_documents_chain,
+        #                                            document_variable_name="docs", return_intermediate_steps=False, verbose=True)
+        # print(map_reduce_chain.run(self.text_processor.split_docs[:3]))
 
+class StuffSummarizerByChapter:
+    def __init__(self):
+        self.text_processor = TextProcessor()
+
+    def summarize(self, data_path):
+        self.text_processor.process_file(data_path)
+        for chapter, docs in self.text_processor.grouped_docs.items():
+            prompt_template = """Write a concise summary of the following chapter:"%chapter%". Text:"{text}" CONCISE SUMMARY:In the %chapter% chapter..."""
+            prompt_template = """Escriba un resumen completo. Texto:"{text}" RESUMEN COMPLETO:En el capítulo %chapter%, ..."""
+            prompt_template = prompt_template.replace("%chapter%", chapter)
+            prompt = PromptTemplate.from_template(prompt_template)
+            llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo-16k", openai_api_key=os.getenv("OPENAI_API_KEY"))
+            llm_chain = LLMChain(llm=llm, prompt=prompt)
+            stuff_chain = StuffDocumentsChain(llm_chain=llm_chain, document_variable_name="text", verbose=True)
+            print(stuff_chain.run(docs))
 
 if __name__ == '__main__':
     path_parent = pathlib.Path(__file__).parent.parent.resolve()
     data_path = f"{path_parent}/data/quijote.txt"
-    # data_path = os.getenv("BOOK_PATH")
+    data_path = os.getenv("BOOK_PATH")
     
-    StuffSummarizer().summarize(data_path)
+    StuffSummarizerByChapter().summarize(data_path)
     # RefineSummarizer().summarize(data_path) 
     # MapReduceSummarizer().summarize(data_path)
     # tutorial: https://python.langchain.com/docs/use_cases/summarization
