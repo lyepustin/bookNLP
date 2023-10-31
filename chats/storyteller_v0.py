@@ -7,30 +7,12 @@ import streamlit as st
 from streamlit_extras.stateful_chat import chat, add_message
 
 from langchain.chat_models import ChatOpenAI
-from langchain.memory import ConversationBufferMemory
-from langchain.chains import ConversationalRetrievalChain
-from langchain.vectorstores import Qdrant
-from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.embeddings import HuggingFaceInstructEmbeddings
-
-from langchain.schema import HumanMessage, SystemMessage, AIMessage
-
-from dotenv import load_dotenv
-import os
-import time
-
-import sys
-from dotenv import load_dotenv
-import os
-import pathlib
-import ebooklib
-from ebooklib import epub
-from bs4 import BeautifulSoup
-import time
-
+from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.schema import Document
 from langchain.chat_models import ChatOpenAI
-from langchain import OpenAI, LLMChain, PromptTemplate
+from langchain.llms import OpenAI
+from langchain.chains import LLMChain
+from langchain.prompts import PromptTemplate 
 from langchain.chains.combine_documents.stuff import StuffDocumentsChain
 from langchain.chains.mapreduce import MapReduceChain, ReduceDocumentsChain, MapReduceDocumentsChain
 from langchain.chains.summarize import load_summarize_chain
@@ -38,7 +20,25 @@ from langchain.document_loaders import TextLoader
 from langchain.prompts import PromptTemplate
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
-load_dotenv()
+import sys
+from typing import Any, Dict, List
+from langchain.callbacks.base import BaseCallbackHandler
+
+
+from dotenv import load_dotenv
+import os
+import time
+
+import sys
+import pathlib
+import ebooklib
+from ebooklib import epub
+from bs4 import BeautifulSoup
+
+import warnings
+# Suppress UserWarning from ebooklib
+warnings.filterwarnings("ignore", category=UserWarning, module="ebooklib")
+
 
 class TextProcessor:
     def __init__(self):
@@ -175,9 +175,16 @@ class StuffSummarizerByChapter:
             print(stuff_chain.run(docs))
 
 
+class StreamingStdOutCallbackHandlerPersonal(BaseCallbackHandler):
+    def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
+        sys.stdout.write(token)
+        sys.stdout.flush()
+
 
 def get_conversation_chain():
-    llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo-16k", openai_api_key=os.getenv("OPENAI_API_KEY"))
+    # llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo-16k", openai_api_key=os.getenv("OPENAI_API_KEY"))
+    llm = ChatOpenAI(model_name="gpt-3.5-turbo-16k", temperature=0.1, openai_api_key=os.getenv("OPENAI_API_KEY"), streaming=True, callbacks=[StreamingStdOutCallbackHandlerPersonal()])
+    llm = ChatOpenAI(model_name="gpt-3.5-turbo-16k", temperature=0.1, openai_api_key=os.getenv("OPENAI_API_KEY"), streaming=True, callbacks=[StreamingStdOutCallbackHandler()])
     return llm
 
 
@@ -187,15 +194,6 @@ def stream_echo(response):
         time.sleep(0.10)
 
 
-# def sent_message(conversation_chain, prompt): 
-#     return conversation_chain(
-#         (
-#             [
-#                 SystemMessage(content="You're a helpful AI"),
-#                 HumanMessage(content=prompt)
-#             ]
-#         )
-#     )
 
 def sent_message(conversation_chain, prompt): 
     data_path = os.getenv("BOOK_PATH")
