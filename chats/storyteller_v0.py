@@ -177,6 +177,7 @@ class StuffSummarizerByChapter:
 
 class StreamingStdOutCallbackHandlerPersonal(BaseCallbackHandler):
     def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
+        yield token + " "
         sys.stdout.write(token)
         sys.stdout.flush()
 
@@ -184,7 +185,7 @@ class StreamingStdOutCallbackHandlerPersonal(BaseCallbackHandler):
 def get_conversation_chain():
     # llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo-16k", openai_api_key=os.getenv("OPENAI_API_KEY"))
     llm = ChatOpenAI(model_name="gpt-3.5-turbo-16k", temperature=0.1, openai_api_key=os.getenv("OPENAI_API_KEY"), streaming=True, callbacks=[StreamingStdOutCallbackHandlerPersonal()])
-    llm = ChatOpenAI(model_name="gpt-3.5-turbo-16k", temperature=0.1, openai_api_key=os.getenv("OPENAI_API_KEY"), streaming=True, callbacks=[StreamingStdOutCallbackHandler()])
+    # llm = ChatOpenAI(model_name="gpt-3.5-turbo-16k", temperature=0.1, openai_api_key=os.getenv("OPENAI_API_KEY"), streaming=True, callbacks=[StreamingStdOutCallbackHandler()])
     return llm
 
 
@@ -206,7 +207,7 @@ def sent_message(conversation_chain, prompt):
         prompt = PromptTemplate.from_template(prompt_template)
         llm_chain = LLMChain(llm=conversation_chain, prompt=prompt)
         stuff_chain = StuffDocumentsChain(llm_chain=llm_chain, document_variable_name="text", verbose=True)
-        return stuff_chain.run(docs)
+        return stuff_chain.run(docs, callbacks=[StreamingStdOutCallbackHandlerPersonal()])
 
 
 def main():
