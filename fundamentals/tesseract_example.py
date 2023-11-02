@@ -3,6 +3,10 @@ import pytesseract
 import pathlib
 
 path_parent = pathlib.Path(__file__).parent.parent.resolve()
-image = Image.open(f"{path_parent}/docs/app.jpg")
+image = Image.open(f"/Users/denlyep/Desktop/a.png")
 text = pytesseract.image_to_string(image)
-print(text)
+
+with open('/Users/denlyep/Desktop/question.txt', 'w') as file:
+    file.write(text)
+
+print("done")
