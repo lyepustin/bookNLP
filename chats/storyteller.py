@@ -1,57 +1,84 @@
-import os
-import openai
+# File: LangChainchatOpenAI.py
+# Author: Denys L
+# Date: October 8, 2023
+# Description:
+
 import streamlit as st
-from dotenv import load_dotenv
+from streamlit_extras.stateful_chat import chat, add_message
+from streamlit_extras.streaming_write import write as streamlit_write
+
+
+from langchain.chat_models import ChatOpenAI
+from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
+from langchain.schema import Document
+from langchain.chat_models import ChatOpenAI
 from langchain.llms import OpenAI
+from langchain.chains import LLMChain
+from langchain.prompts import PromptTemplate
+from langchain.chains.combine_documents.stuff import StuffDocumentsChain
+from langchain.chains.mapreduce import MapReduceChain, ReduceDocumentsChain, MapReduceDocumentsChain
+from langchain.chains.summarize import load_summarize_chain
+from langchain.document_loaders import TextLoader
+from langchain.prompts import PromptTemplate
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+
+import sys
+from typing import Any, Dict, List
+from langchain.callbacks.base import BaseCallbackHandler
 
 
-load_dotenv()
-st.title("ChatGPT-like storyteller")
+from dotenv import load_dotenv
+import os
+import time
 
-openai_api_key = os.getenv("OPENAI_API_KEY")
-
-if "openai_model" not in st.session_state:
-    st.session_state["openai_model"] = "gpt-3.5-turbo"
-
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+import sys
+import pathlib
+import ebooklib
+from ebooklib import epub
+from bs4 import BeautifulSoup
 
 
-# if prompt := st.chat_input("What is up?"):
-prompt = "Quiero que te inventes un cuento largo sobre sobre un pato con un sombrero de playa, gafas negras, cadena de oro y un flotador inchanble"
-
-if prompt:
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
-
-    with st.chat_message("assistant"):
-        message_placeholder = st.empty()
-        full_response = ""
-        for response in OpenAI(temperature=0.7, openai_api_key=openai_api_key)(prompt):
-            full_response += response
-            message_placeholder.markdown(full_response + "▌")
-        message_placeholder.markdown(full_response)
-    st.session_state.messages.append({"role": "assistant", "content": full_response})
+class StreamingStdOutCallbackHandlerPersonal(BaseCallbackHandler):
+    def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
+        st.session_state.full_response = st.session_state.full_response + token
+        st.session_state.placeholder.markdown(
+            st.session_state.full_response + "▌")
+        sys.stdout.write(token)
+        sys.stdout.flush()
 
 
-# Define the scroll operation as a function and pass in something unique for each
-# page load that it needs to re-evaluate where "bottom" is
-# js = f"""
-# <script>
-#     function scroll(dummy_var_to_force_repeat_execution){{
-#         var textAreas = parent.document.querySelectorAll('section.main');
-#         for (let index = 0; index < textAreas.length; index++) {{
-#             textAreas[index].style.color = 'blue'
-#             textAreas[index].scrollTop = textAreas[index].scrollHeight;
-#         }}
-#     }}
-#     scroll({len(st.session_state.messages)})
-# </script>
-# """
+def handle_question(prompt):
+    st.session_state.full_response = ""
+    st.session_state.handler_ia_message = st.chat_message(
+        "assistant", avatar="🤖")
+    st.session_state.placeholder = st.session_state.handler_ia_message.empty()
+    response = st.session_state.llm(prompt)
+    st.session_state.placeholder.markdown(st.session_state.full_response)
+    return response
 
-# st.components.v1.html(js)
+
+def main():
+    load_dotenv()
+    st.title("ChatGPT-like storyteller")
+
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+        st.session_state.handler = StreamingStdOutCallbackHandlerPersonal()
+        st.session_state.llm = OpenAI(model_name="gpt-3.5-turbo-16k", temperature=0.1, openai_api_key=os.getenv(
+            "OPENAI_API_KEY"), streaming=True, callbacks=[st.session_state.handler],  verbose=True)
+
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"], avatar=message["avatar"]):
+            st.markdown(message["content"])
+
+    if prompt := st.chat_input():
+        st.session_state.messages.append({"role": "user", "content": prompt, "avatar":"🧑‍💻"})
+        with st.chat_message("user", avatar="🧑‍💻"):
+            st.markdown(prompt)
+        response = handle_question(prompt)
+        st.session_state.messages.append({"role": "assistant", "content": response, "avatar":"🤖"})
+        print(len(response))
+
+
+if __name__ == '__main__':
+    main()
