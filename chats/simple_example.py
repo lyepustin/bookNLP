@@ -5,6 +5,8 @@
 
 import streamlit as st
 from streamlit_extras.stateful_chat import chat, add_message
+from streamlit_extras.streaming_write import write as streamlit_write
+
 
 from langchain.chat_models import ChatOpenAI
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
@@ -35,32 +37,25 @@ import ebooklib
 from ebooklib import epub
 from bs4 import BeautifulSoup
 
-import warnings
-# Suppress UserWarning from ebooklib
-warnings.filterwarnings("ignore", category=UserWarning, module="ebooklib")
-# warnings.filterwarnings("ignore", category=UserWarning, module="langchain")
-
 
 class StreamingStdOutCallbackHandlerPersonal(BaseCallbackHandler):
     def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
         st.session_state.full_response = st.session_state.full_response + token
-        # st.message_placeholder.markdown(st.session_state.full_response + "▌")
-        with st.chat_message("assistant", avatar="🤖"):
-            st.write(st.session_state.full_response)
+        st.session_state.placeholder.markdown(
+            st.session_state.full_response + "  \nline")
         sys.stdout.write(token)
         sys.stdout.flush()
 
 
-def get_conversation_chain():
-    handler = StreamingStdOutCallbackHandlerPersonal()
-    llm = OpenAI(model_name="gpt-3.5-turbo-16k", temperature=0.1, openai_api_key=os.getenv(
-        "OPENAI_API_KEY"), streaming=True, callbacks=[handler],  verbose=True)
-    return llm
-
-
-def sent_message(conversation_chain, prompt):
-    prompt_template = f"Answer this question: {prompt}"
-    return conversation_chain(prompt_template)
+def handle_question(prompt):
+    st.session_state.full_response = ""
+    st.session_state.handler_ia_message = st.chat_message(
+        "assistant", avatar="🤖")
+    st.session_state.placeholder = st.session_state.handler_ia_message.empty()
+    response = st.session_state.llm(prompt)
+    st.session_state.placeholder.markdown(st.session_state.full_response)
+    st.session_state.full_response = ""
+    return response
 
 
 def main():
@@ -68,15 +63,18 @@ def main():
     st.title("ChatGPT-like storyteller")
 
     if "conversation" not in st.session_state:
-        st.session_state.full_response = ""
-        st.message_placeholder = st.empty()
-        st.session_state.conversation = get_conversation_chain()
+        st.session_state.conversation = []
+        st.session_state.handler = StreamingStdOutCallbackHandlerPersonal()
+        st.session_state.llm = OpenAI(model_name="gpt-3.5-turbo-16k", temperature=0.1, openai_api_key=os.getenv(
+            "OPENAI_API_KEY"), streaming=True, callbacks=[st.session_state.handler],  verbose=True)
 
     with chat(key="my_chat"):
         if prompt := st.chat_input():
             add_message("user", prompt, avatar="🧑‍💻")
-            message = sent_message(st.session_state.conversation, prompt)
-            print(len(message))
+            response = handle_question(prompt)
+            add_message("assistant", response, avatar="🤖")
+            print(len(response))
+    st.empty()
 
 
 if __name__ == '__main__':
