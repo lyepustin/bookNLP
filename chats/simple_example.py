@@ -41,14 +41,8 @@ from bs4 import BeautifulSoup
 class StreamingStdOutCallbackHandlerPersonal(BaseCallbackHandler):
     def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
         st.session_state.full_response = st.session_state.full_response + token
-        st.session_state.placeholder.text(
-            st.session_state.full_response + "▌")
-        # with st.chat_message("assistant"):
-        #     message_placeholder = st.empty()
-        #     message_placeholder.markdown(st.session_state.full_response + "▌")
-        # st.session_state.messages.append(
-        #     {"role": "assistant", "content": full_response})
-        # st.message_placeholder.markdown(st.session_state.full_response + "▌")
+        st.session_state.placeholder.markdown(
+            st.session_state.full_response + "  \nline")
         sys.stdout.write(token)
         sys.stdout.flush()
 
@@ -59,8 +53,8 @@ def handle_question(prompt):
         "assistant", avatar="🤖")
     st.session_state.placeholder = st.session_state.handler_ia_message.empty()
     response = st.session_state.llm(prompt)
-    st.session_state.placeholder.empty()
-    st.session_state.handler_ia_message.empty()
+    st.session_state.placeholder.markdown(st.session_state.full_response)
+    st.session_state.full_response = ""
     return response
 
 
