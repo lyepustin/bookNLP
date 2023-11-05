@@ -58,12 +58,14 @@ class TextProcessor:
         import warnings
         warnings.filterwarnings(
             "ignore", category=UserWarning, module="ebooklib.*")
-        chapter = "Cover"
         for item in epub.read_epub(self.data_path, {"ignore_ncx": False}).get_items():
+            chapter = "Unknown"
             if item.get_type() == ebooklib.ITEM_DOCUMENT:
                 soup = BeautifulSoup(
                     item.get_body_content().decode('utf-8'), "html.parser")
-                if soup.find("h2"):
+                if soup.find("h1"):
+                    chapter = soup.find("h1").get_text()     
+                elif soup.find("h2"):
                     chapter = soup.find("h2").get_text()
                 paragraphs = soup.find_all("p")
                 for paragraph in paragraphs:
