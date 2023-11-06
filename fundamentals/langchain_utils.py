@@ -125,7 +125,7 @@ class StuffSummarizerByChapter:
     def summarize(self, data_path):
         self.text_processor.process_file(data_path)
         for chapter, docs in self.text_processor.grouped_docs.items():
-            prompt_template = """Write a concise summary of the following chapter:"%chapter%". Text:"{text}" CONCISE SUMMARY:..."""
+            prompt_template = """Write a concise summary. Book:"{text}" CONCISE SUMMARY:..."""
             # prompt_template = """Escriba un resumen completo. Texto:"{text}"  RESUMEN COMPLETO:En el capítulo %chapter%, ..."""
             # prompt_template = """Escriba un resumen corto. Texto:"{text}"  RESUMEN CORTO:En el capítulo %chapter%, ..."""
             prompt_template = prompt_template.replace("%chapter%", chapter)

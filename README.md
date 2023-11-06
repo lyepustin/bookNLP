@@ -12,5 +12,6 @@ bookNLP is a Python application that allows you to chat with various digital boo
 
 ---
 
-<img src="./docs/app.gif" width="100%" height="100%">
-![App example](./docs/app.jpg)
+<img src="./img/app.gif" width="100%" height="100%">
+
+![App example](./img/app.jpg)

@@ -24,11 +24,7 @@ class StreamingStdOutCallbackHandlerPersonal(BaseCallbackHandler):
 
 
 def process_book(uploaded_file):
-    # file_contents = uploaded_file.read()
-    # hash_object = hashlib.md5(file_contents)
-    # file_hash = hash_object.hexdigest()
-    # file_name = f'{file_hash}.epub'
-    temp_file_path = f'/Users/denlyep/Downloads/a/{uploaded_file.name}'
+    temp_file_path = f'.trash/{uploaded_file.name}'
     with open(temp_file_path, 'wb') as file:
         file.write(uploaded_file.read())
 
@@ -43,6 +39,9 @@ def process_book(uploaded_file):
     st.session_state.messages.append(
         {"role": "assistant", "content": st.session_state.full_response, "avatar": "🤖"})
     st.session_state.full_response = ""
+
+    # remove temp file
+    os.remove(temp_file_path)
 
 
 def main():
