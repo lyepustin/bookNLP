@@ -6,7 +6,6 @@
 
 import os
 import sys
-import hashlib
 from typing import Any
 import streamlit as st
 from dotenv import load_dotenv
@@ -23,31 +22,18 @@ class StreamingStdOutCallbackHandlerPersonal(BaseCallbackHandler):
         sys.stdout.flush()
 
 
-def process_book(uploaded_file):
-    # file_contents = uploaded_file.read()
-    # hash_object = hashlib.md5(file_contents)
-    # file_hash = hash_object.hexdigest()
-    # file_name = f'{file_hash}.epub'
-    temp_file_path = f'/Users/denlyep/Downloads/a/{uploaded_file.name}'
-    with open(temp_file_path, 'wb') as file:
-        file.write(uploaded_file.read())
-
+def handle_question(prompt):
     st.session_state.full_response = ""
     st.session_state.handler_ia_message = st.chat_message(
         "assistant", avatar="🤖")
     st.session_state.placeholder = st.session_state.handler_ia_message.empty()
-    # magic
-    st.session_state.llm.summarize(temp_file_path)
-    # print output
+    st.session_state.llm.summarize(os.getenv("BOOK_PATH"))
     st.session_state.placeholder.markdown(st.session_state.full_response)
-    st.session_state.messages.append(
-        {"role": "assistant", "content": st.session_state.full_response, "avatar": "🤖"})
-    st.session_state.full_response = ""
 
 
 def main():
     load_dotenv()
-    st.title("Storyteller")
+    st.title("ChatGPT-like storyteller")
 
     if "messages" not in st.session_state:
         st.session_state.messages = []
@@ -59,12 +45,17 @@ def main():
         with st.chat_message(message["role"], avatar=message["avatar"]):
             st.markdown(message["content"])
 
-    st.sidebar.subheader("Your books")
-    uploaded_file = st.sidebar.file_uploader(
-        "Upload your Books here and click on 'Process' to start the story", accept_multiple_files=False)
-    if st.sidebar.button("Process"):
-        with st.spinner("Processing"):
-            process_book(uploaded_file)
+    if prompt := st.chat_input():
+        st.session_state.messages.append(
+            {"role": "user", "content": prompt, "avatar": "🧑‍💻"})
+        with st.chat_message("user", avatar="🧑‍💻"):
+            st.markdown(prompt)
+
+        handle_question(prompt)
+
+        st.session_state.messages.append(
+            {"role": "assistant", "content": st.session_state.full_response, "avatar": "🤖"})
+        st.session_state.full_response = ""
 
 
 if __name__ == '__main__':
