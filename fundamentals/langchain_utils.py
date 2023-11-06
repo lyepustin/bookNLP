@@ -63,10 +63,12 @@ class TextProcessor:
             if item.get_type() == ebooklib.ITEM_DOCUMENT:
                 soup = BeautifulSoup(
                     item.get_body_content().decode('utf-8'), "html.parser")
-                if soup.find("h1"):
-                    chapter = soup.find("h1").get_text()     
+                if soup.find("h3"):
+                    chapter = soup.find("h3").get_text()
                 elif soup.find("h2"):
                     chapter = soup.find("h2").get_text()
+                elif soup.find("h1"):
+                    chapter = soup.find("h1").get_text()
                 paragraphs = soup.find_all("p")
                 for paragraph in paragraphs:
                     if self.raw_documents.get(chapter):
@@ -123,9 +125,9 @@ class StuffSummarizerByChapter:
     def summarize(self, data_path):
         self.text_processor.process_file(data_path)
         for chapter, docs in self.text_processor.grouped_docs.items():
-            prompt_template = """Write a concise summary of the following chapter:"%chapter%". Text:"{text}" CONCISE SUMMARY:In the %chapter% chapter..."""
-            prompt_template = """Escriba un resumen completo. Texto:"{text}"  RESUMEN COMPLETO:En el capítulo %chapter%, ..."""
-            prompt_template = """Escriba un resumen corto. Texto:"{text}"  RESUMEN CORTO:En el capítulo %chapter%, ..."""
+            prompt_template = """Write a concise summary. Book:"{text}" CONCISE SUMMARY:..."""
+            # prompt_template = """Escriba un resumen completo. Texto:"{text}"  RESUMEN COMPLETO:En el capítulo %chapter%, ..."""
+            # prompt_template = """Escriba un resumen corto. Texto:"{text}"  RESUMEN CORTO:En el capítulo %chapter%, ..."""
             prompt_template = prompt_template.replace("%chapter%", chapter)
             prompt = PromptTemplate.from_template(prompt_template)
             llm = ChatOpenAI(temperature=0.1, model_name="gpt-3.5-turbo-16k", openai_api_key=os.getenv(

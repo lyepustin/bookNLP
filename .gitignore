@@ -162,3 +162,6 @@ cython_debug/
 
 # extra for MACOS
 .DS_Store
+
+# temporal directory for books
+.trash
