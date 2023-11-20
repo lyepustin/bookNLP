@@ -1,4 +1,4 @@
-# File: LangChainchatOpenAI.py
+ # File: LangChainchatOpenAI.py
 # Author: Denys L
 # Date: October 8, 2023
 # Description: 
@@ -70,29 +70,43 @@ def get_vector_store(embedding_model):
     )
 
 
+def read_book(path):
+    with open(path, 'r', encoding="utf-8") as file:
+        return file.read()
+
+def read_book_sample():
+    return os.getenv("TEXT_SAMPLE")
+
+
 def add_some_text():
     recreate_qdrant_collection(
         os.getenv("QDRANT_COLLECTION_NAME"), os.getenv("QDRANT_COLLECTION_SIZE"))
-    text = os.getenv("TEXT_SAMPLE")
-    text_chunks = get_text_chunks(text)
-    embedding_model = "text-search-davinci-doc-001"
+
+    # content = read_book('docs/quijote.txt')   
+    content = read_book_sample() 
+        
+    text_chunks = get_text_chunks(content)
+    embedding_model = os.getenv("OPENAI_EMBEDDING_MODEL")
     vector_store = get_vector_store(embedding_model)
+    print(len(text_chunks))
     ids = vector_store.add_texts(text_chunks)
     print(ids)
         
 
 def make_some_query():
-    embedding_model = "text-search-davinci-doc-001"
-    llm = ChatOpenAI()
+    embedding_model = os.getenv("OPENAI_EMBEDDING_MODEL")
+    llm = ChatOpenAI(model_name="gpt-3.5-turbo-16k")
 
     memory = ConversationBufferMemory(
         memory_key='chat_history', return_messages=True)
     conversation_chain = ConversationalRetrievalChain.from_llm(
         llm=llm,
         retriever=get_vector_store(embedding_model).as_retriever(),
-        memory=memory
+        memory=memory,
+        max_tokens_limit=16000,
+        verbose=True,
     )
-    response = conversation_chain({'question': "Que leia Víctor Ros?"})
+    response = conversation_chain({'question': "Que paso al acabar el servicio de carne?"})
     print(response)
             
 # results = [
@@ -109,5 +123,5 @@ def make_some_query():
         
 
 if __name__ == '__main__':
-    # add_some_text()
-    make_some_query()
+    add_some_text()
+    # make_some_query()
