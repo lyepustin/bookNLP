@@ -10,6 +10,10 @@ os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
 os.environ["LANGCHAIN_API_KEY"] = os.getenv("LANGCHAIN_SMITH_API_KEY")
 os.environ["LANGCHAIN_PROJECT"] = "default"
 
+# Do not save inputs & outputs
+os.environ["LANGCHAIN_HIDE_INPUTS"] = "true"
+os.environ["LANGCHAIN_HIDE_OUTPUTS"] = "true"
+
 # The below examples use the OpenAI API, so you will need
 os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
 
